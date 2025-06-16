@@ -35,3 +35,10 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# Project-specific ignores
+projects_source/**/node_modules
+public/projects/**/node_modules
+projects_source/**/backend/node_modules
+public/projects/**/backend/node_modules
+**/.git

@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dodgeflix</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #141414;
+            color: white;
+        }
+
+        .header {
+            background-color: rgba(0, 0, 0, 0.7);
+            padding: 1rem 2rem;
+            position: fixed;
+            width: 100%;
+            top: 0;
+            z-index: 1000;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 1.8rem;
+            font-weight: bold;
+            color: #e50914;
+        }
+
+        .search-container {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .search-input {
+            padding: 0.5rem 1rem;
+            border: 1px solid #333;
+            border-radius: 4px;
+            background-color: #333;
+            color: white;
+            min-width: 300px;
+        }
+
+        .search-btn {
+            padding: 0.5rem 1rem;
+            background-color: #e50914;
+            border: none;
+            border-radius: 4px;
+            color: white;
+            cursor: pointer;
+        }
+
+        .search-btn:hover {
+            background-color: #f40612;
+        }
+
+        .main-content {
+            margin-top: 80px;
+            padding: 2rem;
+        }
+
+        .hero {
+            text-align: center;
+            padding: 3rem 0;
+        }
+
+        .hero h1 {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+        }
+
+        .hero p {
+            font-size: 1.2rem;
+            opacity: 0.8;
+        }
+
+
+
+        .movies-section {
+            margin-top: 2rem;
+        }
+
+        .section-title {
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .movies-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 1rem;
+        }
+
+        .movie-card {
+            background-color: #222;
+            border-radius: 8px;
+            overflow: hidden;
+            transition: transform 0.3s ease;
+            cursor: pointer;
+        }
+
+        .movie-card:hover {
+            transform: scale(1.05);
+        }
+
+        .movie-poster {
+            width: 100%;
+            height: 300px;
+            background-color: #333;
+            background-size: cover;
+            background-position: center;
+            position: relative;
+        }
+
+        .movie-poster img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .no-image {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+            color: #aaa;
+            font-size: 0.8rem;
+            background: linear-gradient(45deg, #333, #555);
+        }
+
+        .movie-info {
+            padding: 1rem;
+        }
+
+        .movie-title {
+            font-weight: bold;
+            margin-bottom: 0.5rem;
+            font-size: 0.9rem;
+            line-height: 1.2;
+        }
+
+        .movie-year {
+            color: #aaa;
+            font-size: 0.8rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .movie-rating {
+            color: #ffd700;
+            font-size: 0.8rem;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 2rem;
+            color: #aaa;
+        }
+
+        .error {
+            text-align: center;
+            padding: 2rem;
+            color: #e50914;
+        }
+
+        .success {
+            color: #4caf50;
+            font-weight: bold;
+        }
+
+        @media (max-width: 768px) {
+            .header {
+                flex-direction: column;
+                gap: 1rem;
+                padding: 1rem;
+            }
+            
+            .search-input {
+                min-width: 200px;
+            }
+            
+            .hero h1 {
+                font-size: 2rem;
+            }
+            
+            .main-content {
+                margin-top: 120px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <div class="logo">DODGEFLIX</div>
+        <div class="search-container">
+            <input type="text" class="search-input" placeholder="Search for movies..." id="searchInput">
+            <button class="search-btn" id="searchBtn">Search</button>
+        </div>
+    </header>
+
+    <main class="main-content">
+        <section class="hero">
+            <h1>Welcome to Dodgeflix</h1>
+            <p>Discover and explore movies with real TMDB data</p>
+        </section>
+
+
+
+        <section class="movies-section">
+            <h2 class="section-title" id="sectionTitle">Popular Movies</h2>
+            <div id="loading" class="loading" style="display: none;">Loading movies...</div>
+            <div id="error" class="error" style="display: none;"></div>
+            <div class="movies-grid" id="moviesGrid"></div>
+        </section>
+    </main>
+
+    <script>
+        // TMDB API Configuration
+        const BASE_URL = 'https://api.themoviedb.org/3';
+        const IMAGE_BASE_URL = 'https://image.tmdb.org/t/p/w500';
+        
+        let API_KEY = '';
+
+        // DOM Elements
+        const searchInput = document.getElementById('searchInput');
+        const searchBtn = document.getElementById('searchBtn');
+        const moviesGrid = document.getElementById('moviesGrid');
+        const loading = document.getElementById('loading');
+        const error = document.getElementById('error');
+        const sectionTitle = document.getElementById('sectionTitle');
+
+        // Initialize app
+        window.addEventListener('load', async () => {
+            await initializeApp();
+        });
+
+        // Fetch API key from backend
+        async function initializeApp() {
+            try {
+                const response = await fetch('/api/movie-config');
+                const data = await response.json();
+                API_KEY = data.apiKey;
+                
+                if (!API_KEY) {
+                    showError('API key not configured. Please contact the administrator.');
+                    return;
+                }
+                
+                loadPopularMovies();
+            } catch (err) {
+                console.error('Error fetching API key:', err);
+                showError('Failed to initialize the application. Please try again later.');
+            }
+        }
+
+        // Search functionality
+        searchBtn.addEventListener('click', handleSearch);
+        searchInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                handleSearch();
+            }
+        });
+
+        async function loadPopularMovies() {
+            if (!API_KEY) {
+                showError('API key not configured. Please contact the administrator.');
+                return;
+            }
+
+            showLoading();
+            sectionTitle.textContent = 'Popular Movies';
+
+            try {
+                const response = await fetch(`${BASE_URL}/movie/popular?api_key=${API_KEY}&language=en-US&page=1`);
+                
+                if (!response.ok) {
+                    throw new Error(`API Error: ${response.status} - ${response.statusText}`);
+                }
+
+                const data = await response.json();
+                displayMovies(data.results, 'Popular Movies');
+            } catch (err) {
+                console.error('Error loading popular movies:', err);
+                showError(`Failed to load popular movies: ${err.message}`);
+            }
+        }
+
+        async function handleSearch() {
+            const query = searchInput.value.trim();
+            
+            if (!API_KEY) {
+                showError('API key not configured. Please contact the administrator.');
+                return;
+            }
+
+            if (!query) {
+                loadPopularMovies();
+                return;
+            }
+
+            showLoading();
+            sectionTitle.textContent = `Search Results for "${query}"`;
+
+            try {
+                const response = await fetch(`${BASE_URL}/search/movie?api_key=${API_KEY}&language=en-US&query=${encodeURIComponent(query)}&page=1`);
+                
+                if (!response.ok) {
+                    throw new Error(`API Error: ${response.status} - ${response.statusText}`);
+                }
+
+                const data = await response.json();
+                
+                if (data.results.length === 0) {
+                    showError(`No movies found for "${query}"`);
+                } else {
+                    displayMovies(data.results, `Search Results for "${query}"`);
+                }
+            } catch (err) {
+                console.error('Error searching movies:', err);
+                showError(`Search failed: ${err.message}`);
+            }
+        }
+
+        function displayMovies(movies, title) {
+            hideAll();
+            sectionTitle.textContent = title;
+            
+            moviesGrid.innerHTML = '';
+            
+            movies.forEach(movie => {
+                const movieCard = createMovieCard(movie);
+                moviesGrid.appendChild(movieCard);
+            });
+        }
+
+        function createMovieCard(movie) {
+            const card = document.createElement('div');
+            card.className = 'movie-card';
+            
+            const year = movie.release_date ? new Date(movie.release_date).getFullYear() : 'N/A';
+            const rating = movie.vote_average ? movie.vote_average.toFixed(1) : 'N/A';
+            const posterUrl = movie.poster_path ? `${IMAGE_BASE_URL}${movie.poster_path}` : null;
+            
+            card.innerHTML = `
+                <div class="movie-poster">
+                    ${posterUrl ? 
+                        `<img src="${posterUrl}" alt="${movie.title}" onerror="this.parentElement.innerHTML='<div class=\\"no-image\\">No Image Available</div>'">` :
+                        '<div class="no-image">No Image Available</div>'
+                    }
+                </div>
+                <div class="movie-info">
+                    <div class="movie-title">${movie.title}</div>
+                    <div class="movie-year">${year}</div>
+                    <div class="movie-rating">⭐ ${rating}/10</div>
+                </div>
+            `;
+            
+            card.addEventListener('click', () => {
+                const overview = movie.overview || 'No description available.';
+                alert(`${movie.title} (${year})\n\nRating: ${rating}/10\n\n${overview}`);
+            });
+            
+            return card;
+        }
+
+        function showLoading() {
+            hideAll();
+            loading.style.display = 'block';
+        }
+
+        function showError(message) {
+            hideAll();
+            error.textContent = message;
+            error.style.display = 'block';
+        }
+
+        function hideAll() {
+            loading.style.display = 'none';
+            error.style.display = 'none';
+        }
+
+        // Instructions
+        console.log('DODGEFLIX - Real TMDB Integration');
+        console.log('=================================');
+        console.log('This app connects to The Movie Database (TMDB) API');
+        console.log('Enjoy real movie data and images!');
+    </script>
+</body>
+</html> 
