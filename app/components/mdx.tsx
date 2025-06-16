@@ -54,6 +54,10 @@ function Code({ children, ...props }) {
 }
 
 function slugify(str) {
+  if (!str || typeof str !== 'string') {
+    return ''
+  }
+  
   return str
     .toString()
     .toLowerCase()
@@ -66,6 +70,10 @@ function slugify(str) {
 
 function createHeading(level) {
   const Heading = ({ children }) => {
+    if (!children) {
+      return React.createElement(`h${level}`, {})
+    }
+    
     let slug = slugify(children)
     return React.createElement(
       `h${level}`,

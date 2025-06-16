@@ -49,6 +49,7 @@ function getMDXData(dir) {
   })
 }
 
+// Get all project posts (keeping function name for compatibility)
 export function getBlogPosts() {
   return getMDXData(path.join(process.cwd(), 'app', 'blog', 'posts'))
 }
