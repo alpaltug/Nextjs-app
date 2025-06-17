@@ -4,6 +4,10 @@ import { MDXRemote } from 'next-mdx-remote/rsc'
 import { highlight } from 'sugar-high'
 import React from 'react'
 
+import { CollapsibleSection } from './collapsible-section'
+import { ActionButton } from './action-button'
+
+
 function Table({ data }) {
   let headers = data.headers.map((header, index) => (
     <th key={index}>{header}</th>
@@ -105,6 +109,8 @@ let components = {
   a: CustomLink,
   code: Code,
   Table,
+  CollapsibleSection,
+  ActionButton,
 }
 
 export function CustomMDX(props) {

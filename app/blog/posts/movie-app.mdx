@@ -10,54 +10,62 @@ summary: 'A dynamic movie discovery application built with HTML, CSS, and JavaSc
 
 This movie discovery application demonstrates modern web development techniques through a clean, interactive interface for exploring movies. Built with vanilla HTML, CSS, and JavaScript, it showcases how powerful web applications can be created without heavy frameworks.
 
-### Core Technologies
+<CollapsibleSection title="Core Technologies" defaultOpen={true}>
 - **HTML5**: Semantic markup for accessibility and SEO
 - **CSS3**: Modern styling with Flexbox/Grid layouts
 - **Vanilla JavaScript**: ES6+ features for clean, maintainable code
+</CollapsibleSection>
 
-### Key Features Implemented
-- **Fetch API** for HTTP requests to movie databases
+<CollapsibleSection title="Key Features Implemented">
+- **Fetch API** for HTTP requests to movie database to fetch the movie data
 - **Async/Await** patterns for handling asynchronous operations
-- **Local Storage** for user preferences and favorites
+- **Local Storage** for user user search query and the returned movies
 - **CSS Grid & Flexbox** for responsive layouts
 - **Intersection Observer** for lazy loading and infinite scroll
+</CollapsibleSection>
 
-## What I Learned
-
+<CollapsibleSection title="What I Learned">
 This project enhanced my skills in:
 
-- **API Integration**: Working with RESTful APIs and handling various response formats
+- **API Integration**: Working with RESTful APIs and handling various response formats. 
 - **Asynchronous Programming**: Mastering promises, async/await, and error handling
 - **State Management**: Managing application state without external libraries
 - **Performance Optimization**: Implementing caching, lazy loading, and efficient rendering
 - **User Experience**: Creating intuitive interfaces with proper loading states and feedback
+</CollapsibleSection>
 
-## Technical Challenges Solved
-
-- **CORS Issues**: Implementing proper API request handling
-- **Rate Limiting**: Creating efficient request batching and caching
+<CollapsibleSection title="Technical Challenges Solved">
+- **CORS Issues**: Implementing proper API request handling with proper exception handling
+- **Rate Limiting**: Creating efficient request batching and caching for future queries
 - **Responsive Images**: Implementing srcset and picture elements for optimal loading
 - **Search Optimization**: Debouncing search inputs for better performance
-- **Memory Management**: Preventing memory leaks in long-running applications
+- **Memory Management**: Preventing memory leaks in long-running applications by adding auto-closing of resources
+</CollapsibleSection>
 
-## Future Enhancements
-
+<CollapsibleSection title="Future Enhancements">
 Potential improvements for this project:
 - Migrate to a more flexible api
-- Add user authentication and personal watchlists
-- Implement movie recommendation algorithms
+- Add user authentication and personal watchlists for a more personal experience
+- Implement movie recommendation algorithms where both the user profile and a underlying recommendation algorithm would have to be implemented
 - Add social features like reviews and ratings
 - Create offline functionality with service workers
-- Integrate with streaming service APIs
+- Integrate with popular streaming service APIs like Amazon Prime and Netflix
 - Add advanced filtering and sorting options
+</CollapsibleSection>
 
 ## Experience Dodgeflix
 
 Ready to explore the movie discovery app? Check out the live demo and dive into the source code:
 
-**🎬 [View Demo App](/projects/movie_app/index.html)** - Experience the interactive Dodgeflix interface
-
-**📖 [View Source Code](https://github.com/alpaltug/Dodgeflix)** - Explore the full Node.js backend implementation from my github
+<div className="flex flex-col sm:flex-row gap-4 mt-6">
+  <ActionButton href="/projects/movie_app/index.html" icon="play" isExternal={false}>
+    View Demo App
+  </ActionButton>
+  
+  <ActionButton href="https://github.com/alpaltug/Dodgeflix" icon="code">
+    View Source Code
+  </ActionButton>
+</div>
 
 ---
 

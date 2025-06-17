@@ -1,3 +1,5 @@
+import Image from 'next/image'
+
 export const metadata = {
   title: 'About',
   description: 'Learn more about me, my background, and my journey as a software developer.',
@@ -5,10 +7,23 @@ export const metadata = {
 
 export default function Page() {
   return (
-    <section className="max-w-4xl">
+    <section className="max-w-4xl mx-auto">
       <div className="mb-12 text-center">
         <h1 className="font-bold text-4xl mb-4 tracking-tight bg-gradient-to-r from-neutral-900 to-neutral-600 dark:from-neutral-100 dark:to-neutral-400 bg-clip-text text-transparent">About Me</h1>
         <div className="w-24 h-1 bg-gradient-to-r from-blue-500 to-purple-500 mx-auto rounded-full"></div>
+      </div>
+      
+      {/* Hero Image */}
+      <div className="mb-8 rounded-2xl overflow-hidden shadow-lg">
+        <Image
+          src="/resources/images/about-page-image.jpeg"
+          alt="About me - Professional photo"
+          width={800}
+          height={400}
+          priority
+          className="w-full h-96 md:h-[32rem] lg:h-[40rem] object-cover"
+          sizes="(max-width: 768px) 100vw, (max-width: 1200px) 80vw, 800px"
+        />
       </div>
       
       {/* Introduction Card */}
@@ -51,7 +66,9 @@ export default function Page() {
             <div className="p-4 bg-gradient-to-br from-neutral-100 to-neutral-200 dark:from-neutral-800 dark:to-neutral-700 rounded-xl border border-neutral-200 dark:border-neutral-600">
               <h3 className="font-semibold text-neutral-900 dark:text-neutral-100 mb-2">🔬 Research Experience</h3>
               <p>
-                I also took part in research; working as a Machine Learning Researcher at Lawrence Livermore National Laboratory, in the field of quantum physics. I worked on modelling particle collision data to predict anolalistic events in future data. Worked with a GAN to solve this issue. I also worked as a Quantitative Researcher at Wheeler Labs at Berkeley, and love all aspects of computer science research! I also was a member of a couple of clubs such as DataScience@Berkeley, Robo Bears, Engineering Student Council.
+                I am also a passionate researcher, having worked at some of the most prestigious research institutions in the world. Namely, I worked as a Machine Learning Researcher at Lawrence Livermore National Laboratory, in the field of quantum physics. Here, my workload consisted of on modelling particle collision data to predict anolalistic events in future data. Learned in-depth about the GAN architecture and it's use cases in this project. 
+                I also worked as a Quantitative Researcher at Wheeler Labs at Berkeley. Here I applied natural language processing based text classification across qualitative plans related to "Groundwater Sustainability", utilized LLM model outputs to deriveinsightful recommendations. 
+                I also interned at Bell Labs over the summer of 2022 where I researched in depth about creating "advertisable" products on Web3. If you didn't guess by now, I love all aspects of computer science research! : - 3
               </p>
             </div>
             

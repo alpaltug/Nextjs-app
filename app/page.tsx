@@ -6,7 +6,7 @@ export default function Page() {
       {/* Hero Section */}
       <div className="mb-12 text-center">
         <h1 className="mb-6 text-5xl font-bold tracking-tight bg-gradient-to-r from-neutral-900 to-neutral-600 dark:from-neutral-100 dark:to-neutral-400 bg-clip-text text-transparent">
-          My Portfolio
+          Alp Altug
         </h1>
         <div className="w-32 h-1 bg-gradient-to-r from-blue-500 to-purple-500 mx-auto rounded-full mb-8"></div>
       </div>
@@ -21,7 +21,7 @@ export default function Page() {
           </div>
           <div className="flex-1">
             <p className="text-lg leading-relaxed text-neutral-700 dark:text-neutral-300">
-              {`I'm a 23-year-old software programmer currently based in Seattle, WA. 
+              {`Hello there! I'm a 23-year-old software programmer currently based in Seattle, WA. 
               Feel free to navigate through my personal website; where you can find my resume,
                projects I worked on the side for fun, and more.`}
             </p>
@@ -37,7 +37,7 @@ export default function Page() {
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
             </svg>
           </div>
-          <h2 className="text-3xl font-bold tracking-tight text-neutral-900 dark:text-neutral-100">Featured Projects</h2>
+          <h2 className="text-3xl font-bold tracking-tight text-neutral-900 dark:text-neutral-100">Featured Posts/Projects</h2>
         </div>
         
         <div className="bg-white dark:bg-neutral-900 rounded-2xl border border-neutral-200 dark:border-neutral-800 shadow-lg p-6">

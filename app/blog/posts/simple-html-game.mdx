@@ -12,27 +12,24 @@ This project showcases the power of vanilla web technologies by creating an enga
 It is a basic text-based game where the hero is trying to navigate a quest where an evil Dragon unleashes terrible fury to their town.
 You can go to the cave to go monster hunting or go to shop to upgrade your equipment or restock. 
 
-## What Makes It Special
-
-## Technical Highlights
-
+<CollapsibleSection title="Technical Highlights">
 The game implements several interesting technical concepts:
 
 - **Event handling** for user interactions (keyboard, mouse, touch)
-- **Animation loops** using `requestAnimationFrame` for smooth gameplay
+- **Animation loops** using `requestAnimationFrame` for smooth gameplay with no bugs
 - **State management** to track game progress and user actions
-- **Collision detection** algorithms for game mechanics
-- **Local storage** integration for saving high scores or progress
+- **Collision detection** algorithms implemented via handler functions for game mechanics
+- **Local storage** integration for saving progress
+</CollapsibleSection>
 
-## Key Features
-
-- **Engaging Gameplay**: Intuitive mechanics that are easy to learn but challenging to master
-- **Visual Appeal**: Clean, modern design with attention to visual details
-- **Cross-Platform**: Works seamlessly on desktop and mobile devices
+<CollapsibleSection title="Key Features">
+- **Engaging Gameplay**: Intuitive mechanics that are easy to learn but and easier to exploit : 3
+- **Visual Appeal**: Simple, old-school design; reminiscing of the older Zelda games.
+- **Cross-Platform**: Works seamlessly on both desktop or mobile browsers. Should resize UI nicely for all devices.
 - **Accessibility**: Keyboard navigation and screen reader friendly elements
+</CollapsibleSection>
 
-## What I Learned
-
+<CollapsibleSection title="What I Learned">
 Building this game reinforced my understanding of:
 
 - DOM manipulation and event handling best practices
@@ -40,23 +37,30 @@ Building this game reinforced my understanding of:
 - JavaScript game loops and performance optimization
 - Creating responsive designs without CSS frameworks
 - The importance of clean, maintainable code structure
+</CollapsibleSection>
 
-## Future Enhancements
-
+<CollapsibleSection title="Future Enhancements">
 Ideas for expanding this project:
 - Add sound effects and background music
 - Implement multiplayer functionality
 - Create additional levels or game modes
 - Add social sharing features for high scores
 - Integrate with web APIs for enhanced features
+</CollapsibleSection>
 
 ## Try It Out
 
 Ready to play? Experience the game yourself and explore the source code:
 
-**🎮 [Play Game](/projects/simple-html-game/index.html)** - Start your adventure in the Dragon Repeller RPG
-
-**📖 [View Source Code](https://github.com/alpaltug/basicDungeonGame)** - Explore the vanilla JavaScript implementation
+<div className="flex flex-col sm:flex-row gap-4 mt-6">
+  <ActionButton href="/projects/simple-html-game/index.html" icon="play" isExternal={false}>
+    Play Game
+  </ActionButton>
+  
+  <ActionButton href="https://github.com/alpaltug/basicDungeonGame" icon="code">
+    View Source Code
+  </ActionButton>
+</div>
 
 ---
 
