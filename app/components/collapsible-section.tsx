@@ -1,6 +1,6 @@
 'use client'
 
-import React from 'react'
+import React, { JSX } from 'react'
 import * as Collapsible from '@radix-ui/react-collapsible'
 import { motion, AnimatePresence } from 'framer-motion'
 import { ChevronDownIcon } from '@radix-ui/react-icons'
