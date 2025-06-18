@@ -348,19 +348,40 @@
             const rating = movie.vote_average ? movie.vote_average.toFixed(1) : 'N/A';
             const posterUrl = movie.poster_path ? `${IMAGE_BASE_URL}${movie.poster_path}` : null;
             
-            card.innerHTML = `
-                <div class="movie-poster">
-                    ${posterUrl ? 
-                        `<img src="${posterUrl}" alt="${movie.title}" onerror="this.parentElement.innerHTML='<div class=\\"no-image\\">No Image Available</div>'">` :
-                        '<div class="no-image">No Image Available</div>'
-                    }
-                </div>
-                <div class="movie-info">
-                    <div class="movie-title">${movie.title}</div>
-                    <div class="movie-year">${year}</div>
-                    <div class="movie-rating">⭐ ${rating}/10</div>
-                </div>
+            // Create poster container
+            const posterDiv = document.createElement('div');
+            posterDiv.className = 'movie-poster';
+            
+            if (posterUrl) {
+                const img = document.createElement('img');
+                img.src = posterUrl;
+                img.alt = movie.title;
+                img.onerror = function() {
+                    this.style.display = 'none';
+                    const noImageDiv = document.createElement('div');
+                    noImageDiv.className = 'no-image';
+                    noImageDiv.textContent = 'No Image Available';
+                    this.parentElement.appendChild(noImageDiv);
+                };
+                posterDiv.appendChild(img);
+            } else {
+                const noImageDiv = document.createElement('div');
+                noImageDiv.className = 'no-image';
+                noImageDiv.textContent = 'No Image Available';
+                posterDiv.appendChild(noImageDiv);
+            }
+            
+            // Create info section
+            const infoDiv = document.createElement('div');
+            infoDiv.className = 'movie-info';
+            infoDiv.innerHTML = `
+                <div class="movie-title">${movie.title}</div>
+                <div class="movie-year">${year}</div>
+                <div class="movie-rating">⭐ ${rating}/10</div>
             `;
+            
+            card.appendChild(posterDiv);
+            card.appendChild(infoDiv);
             
             card.addEventListener('click', () => {
                 const overview = movie.overview || 'No description available.';
