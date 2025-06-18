@@ -4,6 +4,27 @@ publishedAt: '2025-06-15'
 summary: 'A fun interactive game built with vanilla HTML, CSS, and JavaScript. Features engaging gameplay mechanics and responsive design.'
 ---
 
+import Image from 'next/image'
+
+<div className="mb-8">
+  <div className="rounded-2xl overflow-hidden shadow-lg bg-[#00008B] flex justify-center">
+    <div className="max-w-[500px] w-full py-8">
+      <Image
+        src="/resources/images/dungeon-game-image.jpg"
+        alt="Interactive HTML Game - Dungeon Adventure"
+        width={500}
+        height={250}
+        priority
+        className="w-full"
+        sizes="(max-width: 640px) 90vw, 500px"
+      />
+    </div>
+  </div>
+  <p className="text-center text-sm text-neutral-500 dark:text-neutral-400 mt-3 italic">
+    Dungeon Game Preview
+  </p>
+</div>
+
 # Interactive HTML Game 🎮
 
 ## Project Overview

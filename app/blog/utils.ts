@@ -1,5 +1,6 @@
 import fs from 'fs'
 import path from 'path'
+import Image from 'next/image'
 
 type Metadata = {
   title: string
