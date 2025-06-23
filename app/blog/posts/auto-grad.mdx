@@ -1,0 +1,102 @@
+---
+title: 'Autograd from Scratch: Demystifying Backpropagation with a Custom MLP'
+publishedAt: '2025-06-22'
+summary: 'Dive deep into the core mechanics of neural networks by building a custom automatic differentiation (autograd) engine and a Multi-Layer Perceptron (MLP) from the ground up.'
+---
+
+import Image from 'next/image'
+
+<div className="mb-8">
+  <div className="rounded-2xl overflow-hidden shadow-lg bg-gradient-to-br from-purple-800 to-indigo-900 flex justify-center items-center p-8">
+    <div className="max-w-[600px] w-full py-8 text-center text-white">
+      <h2 className="text-3xl sm:text-4xl font-bold mb-4">The Gradient Descent Blueprint</h2>
+      <p className="text-lg sm:text-xl font-light">Crafting a Neural Network's Computational Core</p>
+      <Image
+        src="/resources/images/gradient_accumulation.jpg"
+        alt="Visualization of gradient accumulation in neural networks"
+        width={700}
+        height={400}
+        priority
+        className="w-full mt-6 opacity-80 rounded-lg"
+        sizes="(max-width: 640px) 90vw, 700px"
+      />
+    </div>
+  </div>
+  <p className="text-center text-sm text-neutral-500 dark:text-neutral-400 mt-3 italic">
+    Visualizing how gradients accumulate through multiple computational paths. This simple logic is essentially what makes training LLMS possible.
+  </p>
+</div>
+
+# Autograd from Scratch: Creating my own scalar backpropogation engine - Demystifying Backpropagation 🧠
+
+## Project Overview
+
+In the fast-evolving landscape of deep learning, frameworks like PyTorch and TensorFlow abstract away much of the underlying complexity. While incredibly efficient, this abstraction can sometimes obscure the elegant mechanics that power neural networks. In this project, I researched those very mechanics: building a fully functional **automatic differentiation (autograd) engine** and a **simple Multi-Layer Perceptron (MLP)** entirely from scratch showcasing under the hood how simple it is to create a working example.
+
+The core logic lies in the `Value` class – a custom data type that not only holds a numerical value but also tracks its gradient and the lineage of operations that produced it. This foundational class, complemented by a modular `Module` system for structuring neurons and layers, allowed me to construct a trainable neural network that performs gradient-based optimization without a single external deep learning dependency. It's an exploration of how the chain rule comes alive in code, allowing us to compute gradients efficiently for complex computational graphs. This kind of builds from my undergraduate project for CS189 - Introduction to ML.
+
+<CollapsibleSection title="Core Technologies & Fundamental Concepts" defaultOpen={true}>
+- **`Value` Class**: The atomic unit of my autograd engine. Each `Value` instance encapsulates its numerical `data`, its computed `grad` (gradient), and maintains references (`_children`) to the `Value` objects that were its direct inputs. This forms the implicit computational graph.
+- **Operator Overloading**: Python's `__add__`, `__mul__`, `__pow__`, and custom `relu` methods were overridden to ensure that arithmetic operations between `Value` objects automatically construct the computational graph by linking parent and child `Value` instances and defining their respective `_backprop` (local derivative) functions.
+- **Topological Sort**: A crucial step in the `backwards()` method. This algorithm arranges the nodes of the computational graph in an order such that, when traversed in reverse, ensures that the gradient of each node is computed only after the gradients of all its descendants (closer to the loss) are known.
+- **Backpropagation (`.backwards()`)**: The algorithm orchestrated by the `Value` class that efficiently propagates gradients from the output (loss) node back to all input parameters using the chain rule. The `self.grad = 1.0` initialization for the root loss node is critical for this process.
+- **Module System (`Module`, `Neuron`, `Layer`, `MLP`)**: A structured approach to building neural networks. The `Module` class provides a common interface for `zero_grad()` and `parameters()`, while `Neuron`, `Layer`, and `MLP` build upon this, encapsulating specific architectural components.
+- **Gradient Descent**: The optimization algorithm implemented in the training loops. After gradients are computed via backpropagation, parameters are updated by taking a step proportional to the negative of their gradient, aiming to minimize the loss function.
+</CollapsibleSection>
+
+<CollapsibleSection title="Key Design & Implementation Insights">
+- **Implicit Graph Construction**: The elegant simplicity of building the computational graph on-the-fly via operator overloading. Every arithmetic operation on `Value` objects implicitly creates a new node and defines its dependencies.
+- **Gradient Accumulation**: The consistent use of `+=` for `p.grad` in `_backprop` methods. This is vital for correctly accumulating gradients when a parameter contributes to the loss through multiple computational paths.
+- **Scalar Integration**: Seamlessly handling operations between `Value` objects and raw Python `int`/`float` scalars by automatically wrapping scalars into `Value` objects when necessary (e.g., in `__add__`, `__mul__`).
+- **Robust `Value` Initialization**: A critical refinement was ensuring `Value(data)` always stores a primitive numerical type in `self.data`, preventing accidental nesting of `Value` objects (`Value(Value(5.0))`), which would lead to comparison errors later.
+- **Precision in Derivatives**: Ensuring the correct mathematical derivative rules were implemented in each `_backprop` function (e.g., `x^n` derivative being `n * x^(n-1)`). Minor errors here can lead to exploding or vanishing gradients.
+- **Numerical Stability via Learning Rate**: Discovering firsthand how an excessively high learning rate can cause gradients and loss to explode, underscoring the importance of proper hyperparameter tuning for optimization stability.
+</CollapsibleSection>
+
+## Practical Demonstrations: Training of the Custom MLP
+
+To validate the robustness of the hand-rolled autograd engine and MLP, I applied it to four distinct machine learning problems. These examples showcase the versatility of the framework and the tangible impact of accurate gradient computation. Each scenario involved preparing a suitable dataset, designing an appropriate MLP architecture, implementing a task-specific loss function, and executing an iterative gradient descent training loop. I also verified the results my ML framework generated with equivalent NNs that I created with PyTorch and got the same results! - minus floating point precision
+
+### 1. Binary classification on two dimensional eliptical shaped data (1 Input, 1 Output)
+
+* **Task**: To correctly classify a data point into one of two labels.
+* **Architecture**: A 2-layer, very basic neural network. (`MLP(2, [16, 16, 1])`) -> two hidden layers of 16 neurons
+* **Loss Function**: CSL
+* **Validation**: This was an example using external libraries to load a data set and train/run inference on the model - fully using the Value class to compute the gradients.
+
+### 2. Simple Linear Regression (1 Input, 1 Output)
+
+* **Task**: To model a basic linear relationship, predicting a single continuous output (e.g., `y = 2x + 1`) from a single continuous input.
+* **Architecture**: The simplest `MLP` configuration: one input neuron directly connected to one linear output neuron (`MLP(1, [1])`).
+* **Loss Function**: Mean Squared Error (MSE), defined as the average of the squared differences between the model's predictions and the true target values.
+* **Validation**: This served as our "Hello, World!" for backpropagation. Observing the MSE loss consistently decreasing over epochs provided clear confirmation that our `Value` class was correctly computing and propagating gradients, allowing the model's single weight and bias to converge towards their optimal values.
+
+### 3. Multi-Class Classification (2 Inputs, 3 Classes)
+
+* **Task**: To classify 2D data points into one of three distinct categories.
+* **Architecture**: A more complex `MLP` with two input neurons, a hidden layer of 8 ReLU-activated neurons, and three linear output neurons (`MLP(2, [8, 3])`), corresponding to the three classes. The final layer's linearity provides raw "logits" for classification.
+* **Loss Function**: A simplified multi-class squared error was employed. While true classification often uses Softmax with Cross-Entropy, our custom `Value` operations allowed a straightforward MSE against one-hot encoded targets, which is sufficient for demonstrating gradient flow.
+* **Validation**: This example tested the `relu` activation's backprop, the handling of multiple outputs, and the propagation of gradients through deeper layers. The key indicators of success were the decreasing loss and the increasing accuracy, as the network learned to separate the distinct data clusters.
+
+### 4. Multi-Output Regression (2 Inputs, 2 Outputs)
+
+* **Task**: To simultaneously predict two distinct continuous outputs (e.g., `y1 = x1 + x2`, `y2 = 2*x1 - x2`) from two continuous inputs.
+* **Architecture**: An `MLP` with two input neurons, a hidden layer of 4 ReLU-activated neurons, and two linear output neurons (`MLP(2, [4, 2])`), one for each target.
+* **Loss Function**: A multi-output Mean Squared Error, calculated as the average of squared errors across all individual outputs and all samples.
+* **Validation**: This demonstrated the `MLP`'s capability to learn multiple, potentially independent, relationships from the same set of inputs. The backpropagation correctly handled the fan-out from the hidden layer to two distinct output neurons, allowing the model to minimize the error for both targets concurrently.
+
+## Explore the Autograd Engine
+
+This project offers a unique opportunity to peek under the hood of modern deep learning. By building these components from first principles, one gains an unparalleled intuition for how neural networks learn and optimize.
+
+Ready to dive into the code? You can explore the complete, runnable implementation of our custom `Value` class, the `Module` system, and the practical examples in the Google Colab notebook below. Feel free to run the cells, inspect the intermediate `Value` objects, and even modify the architectures or data to deepen your understanding.
+
+<div className="flex flex-col sm:flex-row gap-4 mt-6">
+  <ActionButton href="https://colab.research.google.com/drive/1KWfmJfbt3dUGd090o1uUTAP5uVEcECJT?usp=sharing" icon="code" isExternal={true}>
+    View Colab Notebook
+  </ActionButton>
+</div>
+
+---
+
+*This project serves as a testament to the elegance and power of automatic differentiation, proving that the fundamental building blocks of AI can be understood and constructed with careful, deliberate code with minimal engineering effort.*
