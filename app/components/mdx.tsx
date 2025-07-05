@@ -6,6 +6,7 @@ import React from 'react'
 
 import { CollapsibleSection } from './collapsible-section'
 import { ActionButton } from './action-button'
+import { MovieGenerator } from './movie-generator'
 
 
 function Table({ data }) {
@@ -111,6 +112,7 @@ let components = {
   Table,
   CollapsibleSection,
   ActionButton,
+  MovieGenerator,
 }
 
 export function CustomMDX(props) {

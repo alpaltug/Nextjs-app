@@ -1,0 +1,149 @@
+---
+title: 'Character-Level Movie Title Generator - Deep Learning from Scratch'
+publishedAt: '2025-01-15'
+summary: 'Building a custom MLP architecture with Batch Normalization for character-level text generation. A deep dive into neural network fundamentals and the magic of BatchNorm.'
+---
+
+import Image from 'next/image'
+import { CollapsibleSection } from '../../components/collapsible-section'
+
+# Building a Character-Level Movie Title Generator
+
+After diving deep into automatic differentiation in my [previous post](/blog/auto-grad), I was inspired to take on a new challenge: building a neural network that generates movie titles character by character. This project combines machine learning fundamentals with a fun objective of generating new movie names, and dives into understanding the intuitive reasoning of the results.
+
+<div className="my-8 p-6 bg-gradient-to-br from-purple-900 to-indigo-900 rounded-xl shadow-lg">
+  <h3 className="text-xl font-bold text-white mb-4">Sample Generated Titles</h3>
+  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+    <div className="bg-black/30 p-4 rounded-lg">
+      <p className="text-white font-mono">"David: A Quest of Saladin"</p>
+      <p className="text-sm text-gray-300 mt-1">Historical/Adventure style</p>
+    </div>
+    <div className="bg-black/30 p-4 rounded-lg">
+      <p className="text-white font-mono">"Lost in Manhattan"</p>
+      <p className="text-sm text-gray-300 mt-1">Classic rom-com style</p>
+    </div>
+    <div className="bg-black/30 p-4 rounded-lg">
+      <p className="text-white font-mono">"Speed Alien"</p>
+      <p className="text-sm text-gray-300 mt-1">Action/Sci-fi mashup</p>
+    </div>
+    <div className="bg-black/30 p-4 rounded-lg">
+      <p className="text-white font-mono">"The Chocolate Cave Kid"</p>
+      <p className="text-sm text-gray-300 mt-1">Family/Adventure style with a twist</p>
+    </div>
+  </div>
+  <p className="text-sm text-gray-300 mt-4 text-center">These are actual outputs from our model, showcasing its ability to generate diverse and genre-aware titles!</p>
+</div>
+
+<CollapsibleSection title="The Architecture: A Custom MLP with BatchNorm">
+I implemented a Multi-Layer Perceptron (MLP) from scratch with the following architecture:
+
+- **Input Layer**: Character-level embeddings (dimension: 24)
+- **Hidden Layers**: Three linear layers with BatchNorm and ReLU activation
+  - First hidden layer: 512 units
+  - Second hidden layer: 256 units
+  - Third hidden layer: 128 units
+- **Flattening Layer**: Custom implementation for sequence processing
+- **Output Layer**: Character-level predictions (vocab_size units)
+
+The addition of Batch Normalization was crucial for:
+- Stabilizing training gradients
+- Improving convergence speed
+- Allowing higher learning rates
+- Reducing internal covariate shift
+
+Each BatchNorm layer normalizes its inputs to zero mean and unit variance, then applies learnable scale and shift parameters to maintain the network's expressivity.
+</CollapsibleSection>
+
+<CollapsibleSection title="The Dataset: Movies from Kaggle">
+For this project, I utilized ["The Movies Dataset"](https://www.kaggle.com/datasets/rounakbanik/the-movies-dataset) from Kaggle, which contains metadata for over 45,000 movies released on or before July 2017. 
+
+Key dataset characteristics:
+- Source: movies_metadata.csv from TMDB
+- Size: ~45,000 movie titles
+- Features used: 'original_title' column
+- Data preprocessing:
+  - Lowercase conversion
+  - Special character removal
+  - Sequence length normalization
+  - Character vocabulary creation
+
+The dataset provides a rich variety of movie titles across different genres, decades, and styles, making it perfect for our character-level generation task.
+</CollapsibleSection>
+
+## Training Results
+
+<CollapsibleSection title="Training Process and Metrics">
+The training process was fascinating to watch. The model started by learning basic character patterns and gradually picked up on more complex movie title structures. Here's how the training progressed:
+
+<div className="my-8">
+  <div className="relative w-full aspect-[16/9] rounded-2xl overflow-hidden">
+    <Image
+      src="/resources/images/model-training.png"
+      alt="Training loss curve showing the model's learning progress"
+      fill
+      className="object-contain bg-white/5"
+      sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+      priority
+    />
+  </div>
+  <p className="text-sm text-gray-500 mt-2 text-center">
+    Training progress over time: The blue line shows training loss and the orange line shows validation loss, 
+    both steadily decreasing as the model learns to generate more coherent titles.
+  </p>
+</div>
+
+Key observations from the training:
+- Initial rapid improvement in the first few epochs
+- Gradual refinement of the loss
+- Stable convergence thanks to BatchNorm
+</CollapsibleSection>
+
+## Generate Your Own Movie Title!
+
+Want to see what the model can create? Click the button below to generate a random movie title. Some are quite creative, others are amusingly absurd, but they all show how the model learned patterns from real movie titles.
+
+<MovieGenerator />
+
+<CollapsibleSection title="Analysis of Generated Titles">
+The model has produced some fascinating results that demonstrate both its strengths and quirks:
+
+1. **Genre Awareness**: Titles like "The Last Girl Like Love" and "Return of the 1000 Breaking Time Baby" show how the model learned common movie title patterns and genre conventions.
+
+2. **Creative Combinations**: "Monster High: Ghoul Will Territory" demonstrates the model's ability to combine familiar elements in new ways.
+
+3. **International Flavor**: The model occasionally generates titles with international flair like "L'avvertimento" and "Lamerica", suggesting it learned patterns from world cinema.
+
+4. **Franchise Patterns**: "Air Bud: A Stranger in Brothers" and "Final Fantasy 2: 515 Secrets" show how it picked up on sequel and franchise naming conventions.
+
+5. **Amusing Innovations**: Some titles like "Butterfly Bastases" and "Minimalian Called Notoisunder" show creative word invention that, while nonsensical, often maintain movie-title-like qualities.
+</CollapsibleSection>
+
+<CollapsibleSection title="Technical Implementation Details">
+The model processes text at the character level, which means it:
+1. Takes a sequence of characters as input
+2. Embeds each character into a higher-dimensional space
+3. Processes these embeddings through multiple layers
+4. Predicts the next character in the sequence
+
+The BatchNorm layers played a crucial role in:
+- Stabilizing the training process
+- Reducing internal covariate shift
+- Allowing for higher learning rates
+</CollapsibleSection>
+
+## Conclusion: Beyond Movie Titles
+
+This project represents more than just a fun exercise in generating movie titles – it's a testament to the power of neural networks and the importance of understanding their fundamental building blocks. Through implementing this character-level model from scratch, I've gained invaluable insights into:
+
+1. **Architecture Design**: The critical role of each layer, from embeddings to BatchNorm, in creating a robust neural network.
+2. **Training Dynamics**: How proper normalization and learning rate scheduling can dramatically improve model convergence.
+3. **Pattern Recognition**: The fascinating way neural networks can learn and reproduce complex patterns in human language.
+
+But what truly excites me is where this technology could lead. Imagine:
+- Generating context-aware titles based on plot summaries
+- Creating multilingual title variations
+- Developing style-transfer systems for creative writing
+
+The code for this project is available on my [GitHub](https://github.com/alpaltug/movieNameGenerator), and I'm actively working on expanding my knowledge. If you're interested in character-level generation or want to talk about something similar, or perhaps more enhanced, that you worked on, feel free to reach out!
+
+This project has been super fun and rewarding towards my passion for deep learning and my commitment to building AI systems that push the boundaries of creativity. Stay tuned for more adventures in AI – I've got some exciting ideas brewing for my next project! 

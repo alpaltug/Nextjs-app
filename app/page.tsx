@@ -1,4 +1,4 @@
-import { BlogPosts } from 'app/components/posts'
+import { FeaturedPosts } from 'app/components/posts'
 
 export default function Page() {
   return (
@@ -41,7 +41,7 @@ export default function Page() {
         </div>
         
         <div className="bg-white dark:bg-neutral-900 rounded-2xl border border-neutral-200 dark:border-neutral-800 shadow-lg p-6">
-          <BlogPosts />
+          <FeaturedPosts />
         </div>
       </div>
     </section>

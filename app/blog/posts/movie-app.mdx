@@ -1,91 +1,162 @@
 ---
-title: 'Movie Discovery App - Dynamic Web Application'
-publishedAt: '2025-06-15'
-summary: 'A dynamic movie discovery application built with HTML, CSS, and JavaScript. Features API integration, search functionality, and modern UI design.'
+title: 'Character-Level Movie Title Generator - Deep Learning from Scratch'
+publishedAt: '2025-01-15'
+summary: 'Building a custom MLP architecture with Batch Normalization for character-level text generation. A deep dive into neural network fundamentals and the magic of BatchNorm.'
 ---
 
 import Image from 'next/image'
 
 <div className="mb-8">
-  <div className="rounded-2xl overflow-hidden shadow-lg">
-    <Image
-      src="/resources/images/dodgeflix-image.jpg"
-      alt="Movie Discovery App - Dodgeflix Interface"
-      width={800}
-      height={600}
-      priority
-      className="w-full h-80 sm:h-96 md:h-[500px] lg:h-[600px] object-cover"
-      sizes="(max-width: 640px) 100vw, (max-width: 768px) 90vw, (max-width: 1024px) 80vw, 800px"
-    />
+  <div className="rounded-2xl overflow-hidden shadow-lg bg-gradient-to-br from-indigo-800 to-purple-900 flex justify-center items-center p-8">
+    <div className="max-w-[700px] w-full py-8 text-center text-white">
+      <h2 className="text-3xl sm:text-4xl font-bold mb-4">From Characters to Cinema</h2>
+      <p className="text-lg sm:text-xl font-light mb-6">Building Neural Networks That Write Movie Titles</p>
+      <div className="bg-black/20 rounded-lg p-6 font-mono text-sm text-left">
+        <div className="text-green-300"># Generated Movie Titles:</div>
+        <div className="text-blue-300">'Moonraker.'</div>
+        <div className="text-blue-300">'The City of Bobby Cambors.'</div>
+        <div className="text-blue-300">'Green Street Fighter 19A9.'</div>
+        <div className="text-blue-300">'Dead Man's Tonight.'</div>
+        <div className="text-blue-300">'The American Hustle.'</div>
+      </div>
+    </div>
   </div>
   <p className="text-center text-sm text-neutral-500 dark:text-neutral-400 mt-3 italic">
-    Dodgeflix Preview
+    A neural network's creative interpretation of movie titles - one character at a time
   </p>
 </div>
 
-# Movie Discovery App 🎬
+# Character-Level Movie Title Generator: Deep Learning from Scratch 🎬
 
 ## Project Overview
 
-This movie discovery application demonstrates modern web development techniques through a clean, interactive interface for exploring movies. Built with vanilla HTML, CSS, and JavaScript, it showcases how powerful web applications can be created without heavy frameworks.
+After my fascinating journey into [automatic differentiation and building neural networks from first principles](/blog/auto-grad), I set my sights on a new challenge: creating a neural network that generates text character by character. This project dives deep into the fundamentals of sequence modeling, custom layer implementation, and the transformative power of Batch Normalization.
 
-<CollapsibleSection title="Core Technologies" defaultOpen={true}>
-- **HTML5**: Semantic markup for accessibility and SEO
-- **CSS3**: Modern styling with Flexbox/Grid layouts
-- **Vanilla JavaScript**: ES6+ features for clean, maintainable code
+The concept is elegantly simple yet powerful: train a model to predict the next character in a sequence, given the preceding ones. By iterating this process, we can generate entirely new movie titles that capture the statistical patterns learned from thousands of real films.
+
+<CollapsibleSection title="Architecture Deep Dive" defaultOpen={true}>
+My custom MLP architecture processes sequences through several key stages:
+
+- **Embedding Layer**: Converts characters into dense vector representations
+- **FlattenConsecutive Layers**: Groups and flattens consecutive character embeddings  
+- **Linear Transformations**: Dense layers with learned weights (no bias, thanks to BatchNorm)
+- **Batch Normalization**: The secret sauce for stable, fast training
+- **Tanh Activations**: Non-linear transformations for complex pattern learning
+- **Output Layer**: Maps to vocabulary-sized probability distributions
+
+The architecture progressively reduces sequence length while increasing feature richness, culminating in a single dense vector that captures the entire sequence context.
 </CollapsibleSection>
 
-<CollapsibleSection title="Key Features Implemented">
-- **Fetch API** for HTTP requests to movie database to fetch the movie data
-- **Async/Await** patterns for handling asynchronous operations
-- **Local Storage** for user user search query and the returned movies
-- **CSS Grid & Flexbox** for responsive layouts
-- **Intersection Observer** for lazy loading and infinite scroll
+<CollapsibleSection title="The Magic of Batch Normalization">
+This project was my first hands-on experience with Batch Normalization, and it was absolutely transformative. Inspired by Ioffe and Szegedy's groundbreaking 2015 paper, I implemented custom BatchNorm1d layers that solve the Internal Covariate Shift problem.
+
+**Why BatchNorm was a game-changer:**
+- **Faster Convergence**: Stable activation distributions allowed higher learning rates
+- **Gradient Health**: Prevented vanishing/exploding gradients in deep networks  
+- **Robustness**: Less sensitivity to weight initialization choices
+- **Regularization Effect**: Implicit regularization through mini-batch statistics
+
+The layer normalizes activations to zero mean and unit variance, then applies learned scale (γ) and shift (β) parameters, allowing the network to learn optimal distributions for each feature.
+</CollapsibleSection>
+
+<CollapsibleSection title="Technical Implementation Details">
+**Model Architecture:**
+- **Input**: Character sequences of length 16 (block_size)
+- **Embedding**: 24-dimensional character embeddings
+- **Hidden Layers**: 4 processing blocks with progressive feature doubling
+- **Parameters**: ~76,000 trainable parameters
+- **Vocabulary**: Cleaned to a-z, 0-9, space, and period characters
+
+**Training Configuration:**
+- **Dataset**: The Movies Dataset from Kaggle (movies_metadata.csv)
+- **Batch Size**: 64 sequences
+- **Learning Rate Schedule**: 0.05 → 0.01 (stepped after 100k iterations)
+- **Training Steps**: 200,000 iterations
+- **Loss Function**: Cross-entropy for character prediction
+
+**Key Implementation Insights:**
+- No bias terms in linear layers (BatchNorm handles shift)
+- Last layer weight initialization scaled by 0.1 for better initial predictions
+- Custom `FlattenConsecutive` layer for hierarchical context building
+</CollapsibleSection>
+
+<CollapsibleSection title="Results and Model Performance">
+The training results exceeded my expectations:
+
+**Final Metrics:**
+- **Training Loss**: 2.0572
+- **Validation Loss**: 2.0579
+
+The remarkably close training and validation losses indicate excellent generalization with no significant overfitting. The model learned underlying patterns rather than memorizing the training data.
+
+**Generated Movie Titles (Selection):**
+- `'Moonraker.'` - Perfect realistic title
+- `'The City of Bobby Cambors.'` - Creative blend with believable structure
+- `'Green Street Fighter 19A9.'` - Interesting combination of known elements
+- `'Dead Man's Tonight.'` - Dramatic and evocative
+- `'The American Hustle.'` - Actual movie title recreation
+- `'Double Confession.'` - Highly plausible thriller title
+
+These results demonstrate the model's ability to learn character-level patterns, word boundaries, common movie title structures, and creative combinations of learned elements.
 </CollapsibleSection>
 
 <CollapsibleSection title="What I Learned">
-This project enhanced my skills in:
+This project reinforced several key concepts:
 
-- **API Integration**: Working with RESTful APIs and handling various response formats. 
-- **Asynchronous Programming**: Mastering promises, async/await, and error handling
-- **State Management**: Managing application state without external libraries
-- **Performance Optimization**: Implementing caching, lazy loading, and efficient rendering
-- **User Experience**: Creating intuitive interfaces with proper loading states and feedback
-</CollapsibleSection>
+**Neural Network Fundamentals:**
+- Deep understanding of forward and backward propagation
+- Importance of proper weight initialization strategies
+- Learning rate scheduling for optimal convergence
 
-<CollapsibleSection title="Technical Challenges Solved">
-- **CORS Issues**: Implementing proper API request handling with proper exception handling
-- **Rate Limiting**: Creating efficient request batching and caching for future queries
-- **Responsive Images**: Implementing srcset and picture elements for optimal loading
-- **Search Optimization**: Debouncing search inputs for better performance
-- **Memory Management**: Preventing memory leaks in long-running applications by adding auto-closing of resources
+**Batch Normalization Theory:**
+- Internal Covariate Shift and its impact on deep networks
+- The mathematical elegance of normalization + learned parameters
+- Practical implementation considerations and edge cases
+
+**Character-Level Modeling:**
+- How statistical patterns emerge from character sequences
+- The trade-offs between model complexity and generalization
+- Evaluation strategies for generative models
+
+**Software Engineering:**
+- Custom layer implementation and testing
+- Modular architecture design for neural networks
+- Performance optimization for training loops
 </CollapsibleSection>
 
 <CollapsibleSection title="Future Enhancements">
-Potential improvements for this project:
-- Migrate to a more flexible api
-- Add user authentication and personal watchlists for a more personal experience
-- Implement movie recommendation algorithms where both the user profile and a underlying recommendation algorithm would have to be implemented
-- Add social features like reviews and ratings
-- Create offline functionality with service workers
-- Integrate with popular streaming service APIs like Amazon Prime and Netflix
-- Add advanced filtering and sorting options
+Several exciting directions for extending this work:
+
+**Architecture Improvements:**
+- Implement attention mechanisms for better long-range dependencies
+- Explore transformer architectures for sequence modeling
+- Add residual connections for deeper networks
+
+**Dataset and Training:**
+- Expand to larger, more diverse text corpora
+- Implement conditional generation (genre-based movie titles)
+- Add temperature sampling for controlled creativity
+
+**Applications:**
+- Extend to other creative writing tasks
+- Implement interactive generation interfaces
+- Add quality scoring mechanisms for generated content
 </CollapsibleSection>
 
-## Experience Dodgeflix
+## Experience the Generator
 
-Ready to explore the movie discovery app? Check out the live demo and dive into the source code:
+Ready to explore the fascinating world of character-level text generation? Dive into the implementation details and see the neural network in action:
 
 <div className="flex flex-col sm:flex-row gap-4 mt-6">
-  <ActionButton href="/projects/movie_app/index.html" icon="play" isExternal={false}>
-    View Demo App
+  <ActionButton href="https://colab.research.google.com/drive/your-colab-link" icon="code" isExternal={true}>
+    View Colab Notebook
   </ActionButton>
   
-  <ActionButton href="https://github.com/alpaltug/Dodgeflix" icon="code">
+  <ActionButton href="https://github.com/yourusername/character-level-generator" icon="code">
     View Source Code
   </ActionButton>
 </div>
 
 ---
 
-*This project demonstrates how modern web APIs and vanilla JavaScript can create rich, interactive applications that rival framework-based solutions.* 
+*This project demonstrates how fundamental neural network concepts like Batch Normalization can transform the capabilities of even simple architectures, opening doors to creative applications in text generation and beyond.* 
