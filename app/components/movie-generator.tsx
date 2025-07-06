@@ -18,15 +18,8 @@ export function MovieGenerator() {
   const generateTitle = async () => {
     setIsGenerating(true)
     try {
-      const response = await fetch('/resources/files/movie_generator_output.txt')
-      const text = await response.text()
-      
-      // Parse the Python list format correctly
-      const titles = text
-        .replace(/^\[|\]$/g, '') // Remove outer brackets
-        .split("', '") // Split on title boundaries
-        .map(t => t.replace(/^'|'$/g, '').trim()) // Remove quotes and trim
-        .filter(t => t && !t.includes("', '")) // Remove any entries that still contain multiple titles
+      const response = await fetch('/resources/files/movie_generator_output.json')
+      const titles = await response.json()
       
       const randomTitle = titles[Math.floor(Math.random() * titles.length)]
       setCurrentTitle(cleanTitle(randomTitle) || 'Error: No titles found')
