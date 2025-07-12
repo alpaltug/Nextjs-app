@@ -7,6 +7,7 @@ import React from 'react'
 import { CollapsibleSection } from './collapsible-section'
 import { ActionButton } from './action-button'
 import { MovieGenerator } from './movie-generator'
+import { TokenizerDemo } from './tokenizer-demo'
 
 
 function Table({ data }) {
@@ -113,6 +114,7 @@ let components = {
   CollapsibleSection,
   ActionButton,
   MovieGenerator,
+  TokenizerDemo,
 }
 
 export function CustomMDX(props) {

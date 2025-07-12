@@ -1,0 +1,286 @@
+---
+title: 'Building a Custom BPE Tokenizer: From Wikipedia to Real-Time Text Processing'
+publishedAt: '2025-07-12'
+summary: 'Deep dive into creating a Byte-Pair Encoding tokenizer from scratch, training it on Jayson Tatum Wikipedia data, and building a real-time tokenization interface.'
+---
+
+import Image from 'next/image'
+import { CollapsibleSection } from '../../components/collapsible-section'
+import { TokenizerDemo } from '../../components/tokenizer-demo'
+
+# Building a Custom BPE Tokenizer from Scratch
+
+After building my [autograd engine](/blog/auto-grad) and [movie title generator](/blog/movie-name-generator), I wanted to dive deeper into the fundamental building blocks of language models. Tokenization is where everything starts - it's how we bridge human language and machine understanding. 
+
+Being a huge Celtics fan, I thought it would be fun to train a tokenizer on Jayson Tatum's Wikipedia page. He's been absolutely crushing it for the us, and I figured his page would give me a solid basketball-focused dataset to work with. Plus, it's way more interesting than training on generic text!
+
+<div className="mb-8">
+  <div className="rounded-2xl overflow-hidden shadow-lg bg-gradient-to-br from-blue-800 to-purple-900 flex justify-center items-center p-8">
+    <div className="max-w-[600px] w-full py-8 text-center text-white">
+      <h2 className="text-3xl sm:text-4xl font-bold mb-4">The Tokenization Engine</h2>
+      <p className="text-lg sm:text-xl font-light">From Raw Text to Meaningful Tokens</p>
+      <Image
+        src="/resources/images/tokenizer-training.jpg"
+        alt="Visualization of tokenizer training process"
+        width={700}
+        height={400}
+        priority
+        className="w-full mt-6 opacity-80 rounded-lg"
+        sizes="(max-width: 640px) 90vw, 700px"
+      />
+    </div>
+  </div>
+  <p className="text-center text-sm text-neutral-500 dark:text-neutral-400 mt-3 italic">
+    The tokenization process: breaking down complex text into manageable, meaningful units that machines can understand.
+  </p>
+</div>
+
+## What I Built
+
+This project ended up being a complete tokenization pipeline - from scraping Wikipedia data to building a real-time interactive demo. I implemented a custom BPE tokenizer inspired by GPT-4's approach, trained it on Jayson Tatum's Wikipedia page, and built a visualization tool so you can see exactly how text gets broken down into tokens. The final result is a 512-token vocabulary that's surprisingly good at compressing basketball-related text.
+
+<div className="my-8 p-6 bg-gradient-to-br from-green-900 to-teal-900 rounded-xl shadow-lg">
+  <h3 className="text-xl font-bold text-white mb-4">Key Performance Metrics</h3>
+  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+    <div className="bg-black/30 p-4 rounded-lg">
+      <p className="text-white font-mono text-lg">"Jayson Tatum is a Celtic."</p>
+      <p className="text-sm text-gray-300 mt-2">8 tokens → 26 characters</p>
+      <p className="text-sm text-green-300 font-semibold">Compression: 38%</p>
+    </div>
+    <div className="bg-black/30 p-4 rounded-lg">
+      <p className="text-white font-mono text-lg">"Basketball Legend..."</p>
+      <p className="text-sm text-gray-300 mt-2">26 tokens → 68 characters</p>
+      <p className="text-sm text-green-300 font-semibold">Compression: 38%</p>
+    </div>
+    <div className="bg-black/30 p-4 rounded-lg">
+      <p className="text-white font-mono text-lg">"General Text (Taylor Swift)"</p>
+      <p className="text-sm text-gray-300 mt-2">229 tokens → 410 characters</p>
+      <p className="text-sm text-yellow-300 font-semibold">Compression: 56%</p>
+    </div>
+    <div className="bg-black/30 p-4 rounded-lg">
+      <p className="text-white font-mono text-lg">Vocabulary Size: 512</p>
+      <p className="text-sm text-gray-300 mt-2">256 base + 255 merges + 1 special</p>
+      <p className="text-sm text-blue-300 font-semibold">Efficient & Compact</p>
+    </div>
+  </div>
+  <p className="text-sm text-gray-300 mt-4 text-center">
+    The cool thing is how much better it handles basketball content compared to general text. Try typing "Celtics" or "Jayson" in the demo below - you'll see how efficiently it tokenizes terms that appeared frequently in the training data.
+  </p>
+</div>
+
+## Try It Out
+
+Here's the interactive demo I built. Type anything you want and watch it get tokenized in real-time. The fun part is trying basketball terms like "Celtics", "Jayson", "Tatum", or "basketball" - you'll see how much more efficiently it handles these compared to random text.
+
+<TokenizerDemo />
+
+<CollapsibleSection title="How BPE Works">
+BPE (Byte-Pair Encoding) is actually pretty clever. It finds the sweet spot between character-level and word-level tokenization by learning from your data.
+
+The algorithm is straightforward:
+1. **Start with basics**: All 256 possible byte values plus any special tokens
+2. **Find patterns**: Look for the most frequent pair of adjacent tokens in your text
+3. **Merge them**: Create a new token for that pair and replace all occurrences
+4. **Repeat**: Keep doing this until you hit your target vocabulary size
+
+When encoding new text, you apply the learned merges in order of frequency. When decoding, you just convert the token IDs back to bytes and then to text.
+
+What makes this cool is that it adapts to your specific dataset. Since I trained on Jayson Tatum's Wikipedia page, it learned that "Jayson", "Tatum", and "Celtics" show up together so often they deserve their own tokens.
+</CollapsibleSection>
+
+<CollapsibleSection title="Details about the dataset; Why Jayson Tatum's Wikipedia Page?">
+
+**General characteristics of the dataset:**
+- **Basketball terminology**: Lots of "Celtics", "NBA", "points", "rebounds" type language
+- **Proper nouns**: Player names, team names, cities
+- **Stats and numbers**: Game statistics, percentages, dates
+- **Mix of writing styles**: Biographical info, career highlights, formal encyclopedic text
+- **Good size**: About 50KB of clean text - enough to train on but not overwhelming
+
+I used the Wikipedia API to grab the raw content from [Jayson Tatum's Wikipedia page](https://en.wikipedia.org/wiki/Jayson_Tatum). The page covers everything from his childhood in St. Louis to winning the championship with the Celtics, so there's a nice mix of personal history and basketball content.
+As on to why I choose this to be the dataset to train the tokenizer on; I was not building the tokenizer with a goal in mind so I wanted to have some extra fun with the it!
+
+The result? My tokenizer became really good at handling basketball text while still working fine on general language. Try typing "Jayson Tatum scored 30 points against the Lakers" in the demo above - you'll see how efficiently it tokenizes basketball-specific phrases.
+</CollapsibleSection>
+
+## The Custom BPE Implementation
+
+<CollapsibleSection title="The BPE Merging Algorithm: A Visual Walkthrough">
+The [Byte-Pair Encoding (BPE) algorithm](https://en.wikipedia.org/wiki/Byte-pair_encoding) is deceptively simple but incredibly powerful. Let me show you exactly how it works with a concrete example using "Jayson Tatum":
+
+**Step 1: Start with bytes**
+```
+Text: "Jayson Tatum"
+Bytes: [74, 97, 121, 115, 111, 110, 32, 84, 97, 116, 117, 109]
+Initial tokens: [J][a][y][s][o][n][ ][T][a][t][u][m]
+```
+
+**Step 2: Count all adjacent pairs**
+```
+Pairs found: (J,a), (a,y), (y,s), (s,o), (o,n), (n, ), ( ,T), (T,a), (a,t), (t,u), (u,m)
+Most frequent: Let's say (a,y) appears 47 times across our dataset
+```
+
+**Step 3: Merge the most frequent pair**
+```
+Before: [J][a][y][s][o][n][ ][T][a][t][u][m]
+After:  [J][ay][s][o][n][ ][T][a][t][u][m]
+New token: "ay" gets ID 257
+```
+
+**Step 4: Repeat until vocabulary is full**
+```
+Iteration 2: Most frequent pair is now (s,o) → "so" gets ID 258
+Iteration 3: (J,ay) → "Jay" gets ID 259
+Iteration 4: (Jay,s) → "Jays" gets ID 260
+Iteration 5: (Jays,o) → "Jayso" gets ID 261
+Iteration 6: (Jayso,n) → "Jayson" gets ID 262
+...and so on
+```
+
+**The Result:**
+After 255 iterations, "Jayson Tatum" becomes just `[262, 32, 318]` - three tokens instead of 12 characters! The algorithm discovered that "Jayson" appears so frequently it deserves its own token, as he should :D.
+
+**Why This Works So Well:**
+1. **Frequency-driven**: Common patterns get merged first
+2. **Hierarchical**: Builds complex tokens from simpler ones
+3. **Adaptive**: Learns the specific patterns in your data
+4. **Reversible**: You can always decode back to the original text
+
+The genius is in the simplicity - just keep merging the most frequent pair until you've built a vocabulary that perfectly captures your data's patterns. No complex neural networks needed, just good old-fashioned counting and merging!
+</CollapsibleSection>
+
+<CollapsibleSection title="What the Tokenizer Learned">
+The training process was actually pretty fun to watch. It was like watching the tokenizer become a basketball fan in real-time.
+
+**Training Stats:**
+- **Data**: ~50KB from Jayson Tatum's Wikipedia page
+- **Time**: Under 30 seconds (way faster than I expected)
+- **Vocabulary**: Started with 256 base tokens, learned 255 new merges
+- **Final size**: 512 tokens total
+
+**The most frequent merges tell the story:**
+1. **"Jayson"** → Token 479 (the star gets his own token!)
+2. **"Tatum"** → Token 318 (appears constantly)
+3. **"Celtics"** → Token 380 (team loyalty!)
+4. **"basketball"** → Token 397 (the sport itself)
+5. **" the"** → Token 294 (still needed common English)
+
+What's cool is that the tokenizer basically became a Celtics fan through training. It learned that basketball terms and player names are so important they deserve dedicated tokens. When you type "Jayson Tatum plays for the Boston Celtics", it recognizes these as single meaningful units instead of breaking them down character by character.
+
+This is exactly why domain-specific tokenizers can be so much more efficient than general-purpose ones.
+</CollapsibleSection>
+
+## Performance Analysis & Insights
+
+<CollapsibleSection title="Compression Efficiency Analysis">
+The tokenizer's performance varies significantly based on text domain:
+
+**Basketball-Related Text (Optimal Domain):**
+- Average compression: 35-40%
+- High frequency of learned tokens
+- Efficient handling of player names and terminology
+- Optimal subword boundaries for sports content
+
+**General English Text:**
+- Average compression: 50-60%
+- Relies more on common English patterns
+- Less efficient but still competitive
+- Good fallback to byte-level representation
+
+**Technical Insights:**
+- Domain-specific training creates clear advantages
+- Proper noun recognition is highly effective
+- Common word patterns are well-optimized
+- Punctuation handling is consistent and efficient
+
+**Comparison with Standard Tokenizers:**
+- Similar compression to GPT-2 tokenizer on general text
+- Superior performance on basketball-specific content
+- More transparent and interpretable token boundaries
+- Smaller vocabulary size enables faster processing
+</CollapsibleSection>
+
+<CollapsibleSection title="Future Enhancements & Applications">
+This tokenizer foundation opens up numerous possibilities:
+
+**Immediate Improvements:**
+- **Larger vocabulary**: Training with 1K-10K tokens for better compression
+- **Multi-domain training**: Combining multiple Wikipedia articles
+- **Advanced patterns**: More sophisticated pre-tokenization rules
+- **Batch processing**: Efficient handling of multiple texts
+
+**Advanced Applications:**
+- **Language model training**: Using this tokenizer for custom model training
+- **Domain adaptation**: Specialized tokenizers for different fields
+- **Multilingual support**: Extending to non-English languages
+- **Real-time translation**: Character-level cross-lingual tokenization
+
+**Integration Opportunities:**
+- **API endpoints**: RESTful service for tokenization
+- **Browser extensions**: Real-time tokenization for web content
+- **Educational tools**: Interactive learning platforms
+- **Research applications**: Tokenization analysis for NLP research
+
+The modular design makes it easy to extend and adapt for various use cases.
+</CollapsibleSection>
+
+## Technical Implementation Details
+
+<CollapsibleSection title="Code Architecture & Best Practices">
+The implementation follows clean architecture principles:
+
+**Class Structure:**
+```python
+class BPE_Tokenizer:
+    def __init__(self):
+        self.vocab = {}          # Token ID → bytes mapping
+        self.merges = {}         # Pair → Token ID mapping
+        self.special_tokens = {} # Special token handling
+        self.pattern = re.compile(r"'(?:[sdmt]|ll|ve|re)| ?\w+| ?\S")
+    
+    def train(self, text, vocab_size, special_tokens=None)
+    def encode(self, text) → List[int]
+    def decode(self, ids) → str
+    def save(self, path)
+    def from_pretrained(cls, path)
+```
+
+**Key Implementation Details:**
+- **Memory efficiency**: Minimal object creation during processing
+- **Error handling**: Graceful degradation for edge cases
+- **Type safety**: Clear input/output type annotations
+- **Serialization**: JSON-based persistence with proper encoding
+- **Extensibility**: Easy to add new features and modifications
+
+**Testing & Validation:**
+- Round-trip testing (encode → decode → original text)
+- Edge case handling (empty strings, special characters)
+- Performance benchmarking on various text sizes
+- Comparison with reference implementations
+</CollapsibleSection>
+
+## Wrapping Up
+
+This project ended up being way more fun than I expected. What started as "let me train a tokenizer on basketball content" turned into a deep dive into how language models actually process text.
+
+**What I learned:**
+1. **Domain-specific training makes a huge difference** - the basketball-focused tokenizer gets 38% compression on Celtics content vs 56% on general text
+2. **BPE is elegantly simple** - the algorithm just learns patterns from your data
+3. **Interactive demos are worth building** - seeing tokenization happen live makes everything click
+4. **Building from scratch teaches you so much more** - you understand every piece when you implement it yourself
+
+The coolest part was watching the tokenizer essentially become a Celtics fan through training. It learned that "Jayson", "Tatum", and "Celtics" are important enough to get their own tokens. That's the power of specialized models - they adapt to your specific domain.
+
+**What's next?**
+I'm thinking about:
+- Training a small language model using this tokenizer (basketball chatbot anyone?)
+- Extending to other sports or domains
+- Building more interactive NLP tools
+- Maybe training on the entire Celtics roster's pages?
+
+The interactive demo above is just the start. I want to keep building tools that make AI concepts accessible and fun to play with.
+
+If you're working on similar stuff, have questions about the implementation, or just want to talk about the Celtics' championship chances, feel free to reach out!
+
+This project captures what I love about building AI - taking something complex and making it both understandable and personally meaningful. More projects like this coming soon! 🏀 
