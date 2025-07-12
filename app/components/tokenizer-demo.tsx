@@ -190,8 +190,8 @@ export function TokenizerDemo() {
     }
   }, [text, tokenizer])
 
-  const avgCompression = tokens.length > 0 
-    ? tokens.reduce((acc, token) => acc + token.compressionRatio, 0) / tokens.length
+  const compressionRatio = text.length > 0 
+    ? Math.round((text.length / tokens.length) * 100)
     : 0
 
   return (
@@ -220,7 +220,7 @@ export function TokenizerDemo() {
         </div>
         <div className="bg-black/30 p-3 rounded-lg">
           <p className="text-sm text-gray-300">Compression Ratio</p>
-          <p className="text-xl font-bold text-green-400">{Math.round(avgCompression * 100)}%</p>
+          <p className="text-xl font-bold text-green-400">{compressionRatio}%</p>
         </div>
       </div>
       
