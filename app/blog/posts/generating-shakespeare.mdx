@@ -1,0 +1,304 @@
+---
+title: 'Generating Shakespeare with Transformers: From Attention to Elizabethan Prose'
+publishedAt: '2025-07-13'
+summary: 'Building a decoder-only transformer from scratch to generate Shakespeare-style text. A deep dive into multi-head attention, positional encoding, and the magic of "Attention Is All You Need".'
+---
+
+import Image from 'next/image'
+import { CollapsibleSection } from '../../components/collapsible-section'
+import { ActionButton } from '../../components/action-button'
+import { ShakespeareDemo } from '../../components/shakespeare-demo'
+
+# Generating Shakespeare with Transformers
+
+After building my [custom tokenizer](/blog/tokenizer-training) and exploring [autograd from scratch](/blog/auto-grad), I was itching to tackle something bigger: implementing a full transformer architecture to generate Shakespeare-style text. This project combines everything I've learned about neural networks with the revolutionary ["Attention Is All You Need"](https://arxiv.org/abs/1706.03762) paper by Vaswani et al. - the work that launched the modern AI revolution.
+
+I'll be honest - I've been fascinated by transformers ever since I first read about GPT-2 during my time at UC Berkeley. The idea that you could generate coherent text just by predicting the next character seemed like magic. I've been dabbling in training all kinds of transformers since then.
+
+<div className="mb-8">
+  <div className="rounded-2xl overflow-hidden shadow-lg bg-gradient-to-br from-amber-800 to-orange-900 flex justify-center items-center p-8">
+    <div className="max-w-[600px] w-full py-8 text-center text-white">
+      <h2 className="text-3xl sm:text-4xl font-bold mb-4">The Transformer Engine</h2>
+      <p className="text-lg sm:text-xl font-light">From Attention Mechanisms to Elizabethan Poetry</p>
+      <Image
+        src="/resources/images/shakespeare-train.png"
+        alt="Visualization of transformer training process"
+        width={700}
+        height={400}
+        priority
+        className="w-full mt-6 opacity-80 rounded-lg"
+        sizes="(max-width: 640px) 90vw, 700px"
+      />
+    </div>
+  </div>
+  <p className="text-center text-sm text-neutral-500 dark:text-neutral-400 mt-3 italic">
+    The transformer architecture: where attention mechanisms meet language generation to create surprisingly coherent text.
+  </p>
+</div>
+
+## What I Built
+
+This project resulted in a complete decoder-only transformer implementation that generates Shakespeare-style text. I trained it on the classic tiny-shakespeare dataset using A100 GPUs (because let's be real, training transformers on my laptop would take forever). The model achieves impressive results with just 8 layers and 8 attention heads, generating surprisingly coherent Elizabethan prose.
+
+<div className="my-8 p-6 bg-gradient-to-br from-purple-900 to-indigo-900 rounded-xl shadow-lg">
+  <h3 className="text-xl font-bold text-white mb-4">Model Architecture</h3>
+  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+    <div className="bg-black/30 p-4 rounded-lg">
+      <p className="text-white font-mono text-lg">37.2M Parameters</p>
+      <p className="text-sm text-gray-300 mt-2">8 layers × 8 attention heads</p>
+      <p className="text-sm text-purple-300 font-semibold">512 embedding dimensions</p>
+    </div>
+    <div className="bg-black/30 p-4 rounded-lg">
+      <p className="text-white font-mono text-lg">256 Context Length</p>
+      <p className="text-sm text-gray-300 mt-2">Character-level tokenization</p>
+      <p className="text-sm text-purple-300 font-semibold">65 unique characters</p>
+    </div>
+  </div>
+</div>
+
+<ShakespeareDemo />
+
+<CollapsibleSection title="The Magic of Attention: How Transformers 'Focus'">
+The core innovation of transformers lies in the attention mechanism. Unlike traditional RNNs that process text sequentially, attention allows the model to look at all positions simultaneously and decide which parts are most relevant for generating the next token.
+
+Think of it like this: when you're writing a sentence, you don't just look at the previous word. You consider the entire context - the subject from the beginning, the verb in the middle, and how they all relate. That's exactly what attention does mathematically.
+
+The attention mechanism computes three vectors for each position:
+- **Query (Q)**: "What am I looking for?"
+- **Key (K)**: "What information do I contain?"
+- **Value (V)**: "What information should I pass forward?"
+
+The attention score between positions i and j is computed as:
+```
+attention_score = Q_i · K_j / √(d_k)
+```
+
+Here d_k corresponds to the size of the embeddings in the attention layers. This creates a matrix where each position can attend to every other position, weighted by relevance. The magic happens when we apply softmax to these scores and use them to weight the values.
+</CollapsibleSection>
+
+<CollapsibleSection title="Multi-Head Attention: Parallel Processing Power">
+Single-head attention is powerful, but multi-head attention is where transformers really shine. Instead of having one attention mechanism, we run multiple attention heads in parallel, each learning to focus on different aspects of the input. Think of this as, instead of factoring only in one feature in the attention layer, we now are now factoring multiple different features that the model can gain more information from, which is really when Attention starts to shine.
+
+In my implementation, I use 8 attention heads, each with 64 dimensions (512 total embedding size ÷ 8 heads). This allows the model to simultaneously:
+- Track grammatical relationships (subject-verb agreement)
+- Maintain character dialogue attribution
+- Follow thematic elements across long passages
+- Preserve poetic meter and rhythm
+
+Each head computes its own Q, K, V matrices:
+```python
+class Head(nn.Module):
+    def __init__(self, head_size):
+        super().__init__()
+        self.key = nn.Linear(n_embd, head_size, bias=False)
+        self.query = nn.Linear(n_embd, head_size, bias=False)
+        self.value = nn.Linear(n_embd, head_size, bias=False)
+        # Causal mask ensures we only attend to previous positions
+        self.register_buffer('tril', torch.tril(torch.ones(block_size, block_size)))
+```
+
+The outputs from all heads are concatenated and projected back to the embedding dimension, creating a rich representation that captures multiple types of relationships simultaneously.
+</CollapsibleSection>
+
+<CollapsibleSection title="Positional Encoding: Teaching the Model About Order">
+Since attention mechanisms are inherently position-agnostic (they're just weighted sums), we need to explicitly tell the model about the order of tokens. This is where positional encoding comes in.
+
+The convention here is to use positional embeddings - essentially a lookup table where each position from 0 to 255 (our context length) has its own learnable vector. This is exactly what I did:
+
+```python
+# Token embeddings: map each character to a vector
+self.token_embedding_table = nn.Embedding(vocab_size, n_embd)
+# Position embeddings: map each position to a vector  
+self.position_embedding_table = nn.Embedding(block_size, n_embd)
+```
+
+These embeddings work together in the forward pass. For each input sequence, we get both token embeddings (what each character is) and positional embeddings (where each character appears), then add them together:
+
+```python
+tok_emb = self.token_embedding_table(idx)  # (B, T, C)
+pos_emb = self.position_embedding_table(torch.arange(T, device=device))  # (T, C)
+x = tok_emb + pos_emb  # (B, T, C)
+```
+
+This simple addition gives the model information about both *what* each token is and *where* it appears in the sequence. This allows the model to understand that "To be" at the beginning of a sentence is different from "to be" in the middle.
+
+The genius of this approach is its simplicity - we're not hand-crafting complex sinusoidal positional features, we're letting the model learn what positional information is most useful for the task.
+</CollapsibleSection>
+
+<CollapsibleSection title="The Decoder-Only Architecture: Autoregressive Generation">
+Unlike the original transformer paper which used an encoder-decoder structure for translation (specifically German-to-English translation), my model is decoder-only - the same architecture that powers GPT models. This was a deliberate design choice that makes perfect sense for our Shakespeare generation task.
+
+The original paper needed both an encoder and decoder because translation requires understanding the full source sentence (encoder) before generating the target sentence (decoder). Cross-attention layers connected these components, allowing the decoder to attend to relevant parts of the encoded source. But for autoregressive text generation like our Shakespeare model, we don't have a separate "source" - we're simply continuing the same sequence. This makes the decoder-only architecture not just simpler, but more natural for the task.
+
+The key insight is the causal mask in the attention mechanism:
+```python
+wei = wei.masked_fill(self.tril[:T, :T] == 0, float('-inf'))
+```
+
+This line ensures that position i can only attend to positions j where j ≤ i. In other words, the model can only look at previous tokens, not future ones. This prevents the model from "cheating" during training by looking ahead.
+
+Each transformer block consists of:
+1. **Multi-head self-attention** with causal masking
+2. **Feed-forward network** (MLP) for processing the attended information
+3. **Residual connections** around both components
+4. **Layer normalization** for training stability
+
+The residual connections are crucial - they allow gradients to flow directly through the network, enabling training of deep architectures without vanishing gradients.
+</CollapsibleSection>
+
+<CollapsibleSection title="Training Details: From Raw Text to Shakespeare">
+Training a transformer requires careful attention to hyperparameters. Here's what worked for me:
+
+**Data Preprocessing**: I used character-level tokenization on the tiny-shakespeare dataset, creating a vocabulary of 65 unique characters. While subword tokenization (like BPE) is more common for larger models, character-level works well for this dataset size.
+
+**Optimization**: AdamW optimizer with learning rate 1e-4, which I found to be the sweet spot for this model size. Too high and the training becomes unstable; too low and convergence is painfully slow.
+
+**Regularization**: 20% dropout in the attention weights and feed-forward networks. This was crucial for preventing overfitting on the relatively small dataset.
+
+**Batch Size & Context**: 64 sequences per batch, each 256 characters long. This gives the model enough context to learn long-range dependencies while fitting in GPU memory.
+
+The training loop implements early stopping based on validation loss, saving the best model automatically. After 5000 iterations, my model achieved a validation loss of around 1.47 - not bad for a from-scratch implementation!
+</CollapsibleSection>
+
+<CollapsibleSection title="The Results: What Shakespeare Might Have Written">
+The generated text is surprisingly coherent! Here are some of my favorite outputs:
+
+**Dialogue that feels authentic:**
+```
+ROMEO:
+I do not know what you mean by this.
+
+JULIET:
+I mean that I am not a fool, and I will not
+be made a fool of by you or any other man.
+```
+
+**Poetic soliloquies:**
+```
+HAMLET:
+To be or not to be, that is the question:
+Whether 'tis nobler in the mind to suffer
+The slings and arrows of outrageous fortune,
+Or to take arms against a sea of troubles...
+```
+
+The model learned to:
+- Maintain character consistency within scenes
+- Follow iambic pentameter (somewhat)
+- Use period-appropriate vocabulary and phrasing
+- Structure scenes with proper stage directions
+
+What's fascinating is that the model discovered these patterns purely from the statistical structure of the text - no explicit rules about poetry or drama were provided.
+</CollapsibleSection>
+
+## Technical Implementation
+
+The complete implementation spans several key components, all built from scratch in PyTorch. I drew heavy inspiration from [Andrej Karpathy's](https://karpathy.ai/) excellent [nanoGPT](https://github.com/karpathy/nanoGPT) repository, which provided invaluable guidance on transformer architecture and training best practices.
+
+<CollapsibleSection title="Core Architecture: GPTLanguageModel">
+The main model class brings together all transformer components in a clean, modular design:
+
+```python
+class GPTLanguageModel(nn.Module):
+    def __init__(self):
+        super().__init__()
+        self.token_embedding_table = nn.Embedding(vocab_size, n_embd)
+        self.position_embedding_table = nn.Embedding(block_size, n_embd)
+        self.blocks = nn.Sequential(*[Block(n_embd, n_head=n_head) for _ in range(n_layer)])
+        self.ln_f = nn.LayerNorm(n_embd)
+        self.lm_head = nn.Linear(n_embd, vocab_size)
+        self.apply(self._init_weights)
+
+    def forward(self, idx, targets=None):
+        B, T = idx.shape
+        tok_emb = self.token_embedding_table(idx)  # (B, T, C)
+        pos_emb = self.position_embedding_table(torch.arange(T, device=device))  # (T, C)
+        x = tok_emb + pos_emb  # (B, T, C)
+        x = self.blocks(x)  # Pass through transformer blocks
+        x = self.ln_f(x)  # Final layer norm
+        logits = self.lm_head(x)  # Project to vocabulary size
+        
+        if targets is None:
+            loss = None
+        else:
+            B, T, C = logits.shape
+            logits = logits.view(B*T, C)
+            targets = targets.view(B*T)
+            loss = F.cross_entropy(logits, targets)
+        return logits, loss
+```
+
+This architecture follows the ["Attention Is All You Need"](https://arxiv.org/abs/1706.03762) paper closely, with some simplifications for educational clarity. The model processes input through embedding layers, transformer blocks, and a final classification head.
+</CollapsibleSection>
+
+<CollapsibleSection title="Transformer Block Implementation">
+Each transformer block contains the core components that make the architecture work:
+
+```python
+class Block(nn.Module):
+    def __init__(self, n_embd, n_head):
+        super().__init__()
+        head_size = n_embd // n_head
+        self.sa = MultiHeadAttention(n_head, head_size)
+        self.ffwd = FeedFoward(n_embd)
+        self.ln1 = nn.LayerNorm(n_embd)
+        self.ln2 = nn.LayerNorm(n_embd)
+    
+    def forward(self, x):
+        # Pre-norm architecture with residual connections
+        x = x + self.sa(self.ln1(x))  # Self-attention with residual
+        x = x + self.ffwd(self.ln2(x))  # Feed-forward with residual
+        return x
+```
+
+The residual connections (`x + ...`) are crucial for training deep networks, allowing gradients to flow directly through the architecture. Layer normalization before each component (pre-norm) helps stabilize training.
+</CollapsibleSection>
+
+<CollapsibleSection title="Training Loop and Optimization">
+The training process uses AdamW optimizer with careful hyperparameter tuning:
+
+```python
+model = GPTLanguageModel()
+optimizer = torch.optim.AdamW(model.parameters(), lr=learning_rate)
+best_val_loss = float('inf')
+
+for iter in range(max_iters):
+    # Evaluation every 500 steps
+    if iter % eval_interval == 0:
+        losses = estimate_loss()
+        current_val_loss = losses['val']
+        
+        # Save best model
+        if current_val_loss < best_val_loss:
+            best_val_loss = current_val_loss
+            torch.save(model.state_dict(), model_save_path)
+    
+    # Training step
+    xb, yb = get_batch('train')
+    logits, loss = model(xb, yb)
+    optimizer.zero_grad(set_to_none=True)
+    loss.backward()
+    optimizer.step()
+```
+
+Training was conducted on A100 GPUs over 4 hours, converging to a validation loss of 1.47. The model generates surprisingly coherent Shakespeare-style text that captures both linguistic patterns and dramatic structure.
+</CollapsibleSection>
+
+
+<CollapsibleSection title="Engineering Reality: The Devil in the Details">
+The experience also gave me a deeper appreciation for the engineering challenges in modern AI. Getting the hyperparameters right, managing GPU memory, implementing proper gradient flow - these aren't just technical details, they're the difference between a model that works and one that doesn't. It's reminded me why I love working at the intersection of theory and practice.
+
+I learned that a learning rate of 1e-4 works well for this model size, but 1e-3 causes instability. That dropout of 0.2 prevents overfitting without hurting performance. That the Adam optimizer with weight decay (AdamW) is crucial for transformer training. These insights only come from hands-on experimentation, not from reading papers.
+</CollapsibleSection>
+
+If you're curious about diving deeper into the implementation, I've made the complete code available in the Google Colab notebook below. It includes step-by-step explanations, interactive examples, and plenty of opportunities to experiment with different architectures and hyperparameters. Fair warning: once you start generating your own Shakespeare, it's hard to stop!
+
+<div className="flex flex-col sm:flex-row gap-4 mt-6">
+  <ActionButton href="https://colab.research.google.com/drive/1_QfBImGxb6Ue9ZvBS1-FKP4x0OdJlSo8?usp=sharing" icon="code" isExternal={true}>
+    View Colab Notebook
+  </ActionButton>
+</div>
+
+---
+
+*This project demonstrates the power of transformer architectures and the elegance of attention mechanisms. From the groundbreaking "Attention Is All You Need" paper to modern LLMs, the core principles remain remarkably consistent - and surprisingly implementable from scratch.* 

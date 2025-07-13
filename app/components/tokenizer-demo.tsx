@@ -31,17 +31,14 @@ const tokenColors = [
 const basketballTokens: Record<string, boolean> = {
   'jayson': true,
   'tatum': true, 
+  'eltic': true,
   'celtics': true,
-  'celtic': true,
   'basketball': true,
   'nba': true,
   'boston': true,
-  'points': true,
+  'point': true,
   'game': true,
-  'player': true,
-  'championship': true,
-  'finals': true,
-  'playoffs': true
+
 }
 
 class BPETokenizer {

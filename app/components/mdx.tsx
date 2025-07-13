@@ -8,6 +8,7 @@ import { CollapsibleSection } from './collapsible-section'
 import { ActionButton } from './action-button'
 import { MovieGenerator } from './movie-generator'
 import { TokenizerDemo } from './tokenizer-demo'
+import { ShakespeareDemo } from './shakespeare-demo'
 
 
 function Table({ data }) {
@@ -115,6 +116,7 @@ let components = {
   ActionButton,
   MovieGenerator,
   TokenizerDemo,
+  ShakespeareDemo,
 }
 
 export function CustomMDX(props) {

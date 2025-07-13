@@ -1,7 +1,7 @@
 import Link from 'next/link'
 import { formatDate, getBlogPosts } from 'app/blog/utils'
 
-const FEATURED_POSTS = ['welcome-message', 'auto-grad', 'movie-name-generator', 'tokenizer-training']
+const FEATURED_POSTS = ['welcome-message', 'auto-grad', 'movie-name-generator', 'tokenizer-training', 'generating-shakespeare']
 
 export function FeaturedPosts() {
   let allProjects = getBlogPosts()
